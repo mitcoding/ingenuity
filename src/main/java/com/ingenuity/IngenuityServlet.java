@@ -1,4 +1,4 @@
-package main.java.com.ingenuity;
+package com.ingenuity;
 
 import java.io.IOException;
 import javax.servlet.http.*;
