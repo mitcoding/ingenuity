@@ -1,6 +1,15 @@
 package hello;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import com.adobe.analytics.client.AnalyticsClient;
+import com.adobe.analytics.client.AnalyticsClientBuilder;
+import com.adobe.analytics.client.domain.CompanyReportSuite;
+import com.adobe.analytics.client.domain.CompanyReportSuites;
+import com.adobe.analytics.client.methods.ReportSuiteMethods;
+
+import java.io.IOException;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
@@ -20,5 +29,27 @@ public class HelloController {
     @RequestMapping("/api/views")
     public String views() {
         return "Greetings from Spring Boot!";
+    }
+    
+    @RequestMapping("/api/views/v.2")
+    public String views2() {
+    	AnalyticsClient client = new AnalyticsClientBuilder()
+    		.setEndpoint("api2.omniture.com")
+    		.authenticateWithSecret("user_name", "secret")
+    		.withProxy("stringProxy", 0)
+    		.build();
+    	ReportSuiteMethods suiteMethods = new ReportSuiteMethods(client); //client is created as above
+    	CompanyReportSuites reportSuites;
+		try {
+			reportSuites = suiteMethods.getReportSuites();
+			for (CompanyReportSuite suite : reportSuites.getReportSuites()) {
+	    	    System.out.println(suite.toString());
+	    	}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return "Got here";
     }
 }
