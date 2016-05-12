@@ -3,6 +3,7 @@ package hello;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.json.JSONObject;
@@ -11,16 +12,16 @@ import org.springframework.stereotype.Service;
 
 import com.adobe.analytics.client.AnalyticsClient;
 import com.adobe.analytics.client.AnalyticsClientBuilder;
-import com.adobe.analytics.client.domain.CompanyReportSuite;
-import com.adobe.analytics.client.domain.CompanyReportSuites;
-import com.adobe.analytics.client.methods.ReportSuiteMethods;
+import com.adobe.analytics.client.ApiException;
+import com.adobe.analytics.client.domain.ReportDescription;
+import com.adobe.analytics.client.domain.ReportDescriptionElement;
+import com.adobe.analytics.client.domain.ReportResponse;
+import com.adobe.analytics.client.methods.ReportMethods;
 
 @Service
 public class DefaultAnalyticsService implements AnalyticsService {
 	
-    private static String USERNAME = "";
-    private static String PASSWORD = "";
-	
+
 	@Override
 	public String queryDate(String date, String[] pageNames) throws IOException, InterruptedException {
 	      Map<String, Object> map = new HashMap<String, Object>();
@@ -60,30 +61,84 @@ public class DefaultAnalyticsService implements AnalyticsService {
 //		String response = queryDate(date, pageNames);
 //	}
 	
-	@Override
-	public String getAnalytics() {
-
-		AnalyticsClient client = new AnalyticsClientBuilder()
-		.setEndpoint("api2.omniture.com")
-		.authenticateWithSecret(USERNAME, PASSWORD)
-		.withProxy("", 0)
-		.build();
-
-		StringBuilder builder = new StringBuilder();
-
-		ReportSuiteMethods suiteMethods = new ReportSuiteMethods(client); //client is created as above
-		CompanyReportSuites reportSuites;
-		try {
-			reportSuites = suiteMethods.getReportSuites();
-			for (CompanyReportSuite suite : reportSuites.getReportSuites()) {
-				System.out.println(suite.toString());
-				builder.append(suite.toString());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return builder.toString();
+	public int getPageName(String date, List<String> pageNames, ReportMethods reportMethods) throws IOException, InterruptedException {
+		ReportDescription desc = new ReportDescription();
+		desc.setReportSuiteID(Constants.REPORT_SUITE_ID);
+		desc.setDate(date);
+		//desc.setDateFrom("2016-05-05");
+		//desc.setDateTo("2016-05-10");
+		desc.setMetricIds("pageViews");
+		//desc.setElementIds("page");
+		ReportDescriptionElement element = new ReportDescriptionElement();
+		element.setSelected(pageNames);
+		element.setId("page");
+		// desc.setDateGranularity(ReportDescriptionDateGranularity.DAY);
+		List<ReportDescriptionElement> elementList = new ArrayList<ReportDescriptionElement>();
+		elementList.add(element);
+		desc.setElements(elementList);
+		int reportId = reportMethods.queue(desc);
+		return reportId;
 	}
+	
+	public PageView getPageViewForReportId(int reportId, String date, ReportMethods reportMethods) throws InterruptedException, IOException {
+		ReportResponse response = getResponse(reportId, reportMethods);
+		return new AnalyticsReportMapper().fromReportResponse(date, response);
+	}
+	
+	public List<PageView> getPageViews(List<String> dates, List<String> pageNames) throws IOException, InterruptedException {
+		AnalyticsClient client = getClient();
+		ReportMethods reportMethods = new ReportMethods(client); //client is created as above
+		List<PageView> pageViews = new ArrayList<PageView>();
+		int[] reportIds = new int[dates.size()];
+		int i = 0;
+		for (String date : dates) {
+			reportIds[i++] = getPageName(date, pageNames, reportMethods);
+		}
+		i = 0;
+		for (String date : dates) {
+			PageView pageView = getPageViewForReportId(reportIds[i++], date, reportMethods);
+			pageViews.add(pageView);
+		}
+		return pageViews;
+	}
+	
+	public AnalyticsReport getReport(List<String> dates, List<String> pageNames) throws IOException, InterruptedException {
+		AnalyticsReport report = new AnalyticsReport();
+		List<PageView> pageViews = getPageViews(dates, pageNames);
+		report.setPageViews(pageViews);
+		return report;
+	}
+
+	
+	
+	public ReportResponse getResponse(int reportId, ReportMethods reportMethods) throws InterruptedException, IOException {
+		ReportResponse response = null;
+		while (response == null) {
+			try {
+				response = reportMethods.get(reportId);
+			} catch (ApiException e) {
+				if ("report_not_ready".equals(e.getError())) {
+					System.err.println("Report not ready yet.");
+					Thread.sleep(3000);
+					continue;
+				}
+				throw e;
+			}
+		}
+		return response;
+	}
+	
+	
+	public AnalyticsClient getClient() {
+		AnalyticsClientBuilder builder = new AnalyticsClientBuilder()
+		.setEndpoint("api2.omniture.com")
+		.authenticateWithSecret(Constants.USERNAME, Constants.PASSWORD);
+		
+		if (Constants.PROXY_ENABLED) {
+			builder.withProxy(Constants.PROXY_NAME, Constants.PROXY_PORT);
+		}
+		
+		return builder.build();
+}
+	
 }

@@ -35,14 +35,16 @@ import org.apache.commons.codec.binary.Base64;
 
 	public class SiteCatalyst {
 
-	    private static String USERNAME = "";
-	    private static String PASSWORD = "";
+	    private static String USERNAME = Constants.USERNAME;
+	    private static String PASSWORD = Constants.PASSWORD;
 	    private static String ENDPOINT = "https://api.omniture.com/admin/1.4/rest/"; 
 	    
 
-	    public static String callMethod(String method, String data) throws IOException {
-	        System.setProperty("https.proxyHost", "");
-	        System.setProperty("https.proxyPort", "");
+	    public static String callMethod(String method, String data) throws IOException { 
+	    	if (Constants.PROXY_ENABLED) {
+	        System.setProperty("https.proxyHost", "irvcache");
+	        System.setProperty("https.proxyPort", String.valueOf(Constants.PROXY_PORT));
+	    	}
 
 	        URL url = new URL(ENDPOINT + "?method=" + method);
 	        URLConnection connection = url.openConnection();

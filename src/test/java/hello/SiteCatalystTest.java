@@ -67,7 +67,7 @@ public class SiteCatalystTest {
 	      Map<String, Object> reportMap = new HashMap<String, Object>();
 	      
 	      reportMap.put("date", date);
-	      reportMap.put("reportSuiteID", "capgroupint");
+	      reportMap.put("reportSuiteID", Constants.REPORT_SUITE_ID);
 	      Map<String, Object> metricMap = new HashMap<String, Object>();
 	      metricMap.put("id", "pageViews");
 	      ArrayList<Map<String,Object>> metricArray = new ArrayList<Map<String,Object>>();
@@ -108,7 +108,7 @@ public class SiteCatalystTest {
 	      
 	      reportMap.put("dateTo", "2016-05-10");
 	      reportMap.put("dateFrom","2016-05-03");
-	      reportMap.put("reportSuiteID", "capgroupintstg");
+	      reportMap.put("reportSuiteID", Constants.REPORT_SUITE_ID);
 	      Map<String, Object> metricMap = new HashMap<String, Object>();
 	      metricMap.put("id", "pageViews");
 	      ArrayList<Map<String,Object>> metricArray = new ArrayList<Map<String,Object>>();

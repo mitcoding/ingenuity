@@ -1,7 +1,7 @@
 package hello;
 
 
-public class AnalyticsData {
+public class PageView {
 	
 	private String date;
 	

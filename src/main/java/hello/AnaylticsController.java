@@ -1,12 +1,12 @@
 package hello;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -16,11 +16,20 @@ public class AnaylticsController {
 	private AnalyticsService service;
 
     @RequestMapping("/analytics")
-    public String index() throws IOException, InterruptedException {
-		String[] pageNames = {"advisor &gt; INVESTMENTS", "products &gt; American Funds Insurance Series"};
-		String date = "2016-05-10";
-		String response = service.queryDate(date, pageNames);
-		return response;
+    public AnalyticsReport index() throws IOException, InterruptedException {
+		List<String> pageNames = new ArrayList<String>();
+		pageNames.add("advisor &gt; INVESTMENTS");
+		pageNames.add("products &gt; American Funds Insurance Series®");
+		List<String> dates = new ArrayList<String>();
+		dates.add("2016-01-04");
+		dates.add("2016-01-05");
+		dates.add("2016-01-06");
+		dates.add("2016-01-07");
+		dates.add("2016-01-08");
+		// PageView pageView = service.getPageName(date, pageNames);
+		// List<PageView> pageViews = service.getPageViews(dates, pageNames);
+		AnalyticsReport report = service.getReport(dates, pageNames);
+		return report;
     }
 
 }
