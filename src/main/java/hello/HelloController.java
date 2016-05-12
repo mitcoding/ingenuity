@@ -4,11 +4,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.adobe.analytics.client.AnalyticsClient;
 import com.adobe.analytics.client.AnalyticsClientBuilder;
+import com.adobe.analytics.client.ApiException;
 import com.adobe.analytics.client.domain.CompanyReportSuite;
 import com.adobe.analytics.client.domain.CompanyReportSuites;
+import com.adobe.analytics.client.domain.ReportData;
+import com.adobe.analytics.client.domain.ReportDescription;
+import com.adobe.analytics.client.domain.ReportDescriptionElement;
+import com.adobe.analytics.client.domain.ReportDescriptionLocale;
+import com.adobe.analytics.client.domain.ReportDescriptionMetric;
+import com.adobe.analytics.client.domain.ReportDescriptionSegment;
+import com.adobe.analytics.client.domain.ReportResponse;
+import com.adobe.analytics.client.methods.ReportMethods;
 import com.adobe.analytics.client.methods.ReportSuiteMethods;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -31,24 +42,78 @@ public class HelloController {
         return "Greetings from Spring Boot!";
     }
     
+    /**
+     * @return
+     * @throws IOException 
+     * @throws InterruptedException 
+     */
     @RequestMapping("/api/views/v.2")
-    public String views2() {
-    	AnalyticsClient client = new AnalyticsClientBuilder()
+    public String views2() throws IOException, InterruptedException {
+    	AnalyticsClientBuilder build = new AnalyticsClientBuilder()
     		.setEndpoint("api2.omniture.com")
-    		.authenticateWithSecret("user_name", "secret")
-    		.withProxy("stringProxy", 0)
-    		.build();
-    	ReportSuiteMethods suiteMethods = new ReportSuiteMethods(client); //client is created as above
-    	CompanyReportSuites reportSuites;
-		try {
-			reportSuites = suiteMethods.getReportSuites();
-			for (CompanyReportSuite suite : reportSuites.getReportSuites()) {
-	    	    System.out.println(suite.toString());
-	    	}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    		.authenticateWithSecret(Constants.USERNAME, Constants.PASSWORD)
+    	;
+    	if (Constants.PROXY_ENABLED == true) {
+    		build.withProxy(Constants.PROXY_NAME, Constants.PROXY_PORT);
+    	}
+    	
+    	AnalyticsClient client = build.build();
+    	
+    	ReportDescription desc = new ReportDescription();
+    	ReportDescriptionMetric metric = new ReportDescriptionMetric();
+    	ReportDescriptionElement element = new ReportDescriptionElement();
+    	ReportDescriptionSegment segment = new ReportDescriptionSegment();
+    	ReportDescriptionElement segmentElement = new ReportDescriptionElement();
+    	List<String> selected = new ArrayList<String>();
+    	List<ReportDescriptionMetric> metrics = new ArrayList<ReportDescriptionMetric>();
+    	List<ReportDescriptionElement> elements = new ArrayList<ReportDescriptionElement>();
+    	List<ReportDescriptionSegment> segments = new ArrayList<ReportDescriptionSegment>();
+    	
+    	metric.setId("pageViews");
+    	metrics.add(metric);
+    	
+    	selected.add("Investments > Fund Details: American Balanced Fund - Class R-5E");
+    	element.setId("page");
+    	element.setSelected(selected);
+    	element.setTop(8000);
+    	elements.add(element);
+    	element = new ReportDescriptionElement();
+    	element.setId("eVar5");
+    	element.setTop(20);
+    	elements.add(element);
+    	
+    	segment.setElement("Advisor ID (AEID-evar)");
+    	segments.add(segment);
+    	
+    	desc.setReportSuiteID("capgroupint");
+    	desc.setLocale(ReportDescriptionLocale.EN_US);
+    	desc.setDateFrom("2016-01-01");
+    	desc.setDateTo("2016-01-05");
+    	desc.setMetrics(metrics);
+    	desc.setElements(elements);
+    	//desc.setSegments(segments);
+    	
+    	ReportMethods reportMethods = new ReportMethods(client);
+    	int reportId = reportMethods.queue(desc);
+    	
+    	ReportResponse response = null;
+    	while (response == null) {
+    	    try {
+    	        response = reportMethods.get(reportId);
+    	    } catch (ApiException e) {
+    	        if ("report_not_ready".equals(e.getError())) {
+    	            System.err.println("Report not ready yet.");
+    	            Thread.sleep(3000);
+    	            continue;
+    	        }
+    	        throw e;
+    	    }
+    	}
+    	
+    	if (response != null) {
+    		List<ReportData> reportData = response.getReport().getData();
+    		System.out.println(reportData.toString() );
+    	}
     	
     	return "Got here";
     }
