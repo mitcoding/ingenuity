@@ -29,7 +29,7 @@ public class AnalyticsServiceTest {
 	public void getPageName() throws IOException, InterruptedException {
 		List<String> pageNames = new ArrayList<String>();
 		pageNames.add("advisor &gt; INVESTMENTS");
-		pageNames.add("products &gt; American Funds Insurance Series®");
+		pageNames.add("products &gt; American Funds Insurance Series");
 		List<String> dates = new ArrayList<String>();
 		dates.add("2016-05-10");
 		List<PageView> pageViews = service.getPageViews(dates, pageNames);

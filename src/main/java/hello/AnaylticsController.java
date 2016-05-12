@@ -20,6 +20,8 @@ public class AnaylticsController {
 		List<String> pageNames = new ArrayList<String>();
 		pageNames.add("advisor &gt; INVESTMENTS");
 		pageNames.add("products &gt; American Funds Insurance Series®");
+		pageNames.add("news &gt; Capital Gain Distributions for AMBAL, FI and ICA");
+		pageNames.add("market-commentary &gt; Positioning Income-Oriented Portfolios for Rising Rates");
 		List<String> dates = new ArrayList<String>();
 		dates.add("2016-01-04");
 		dates.add("2016-01-05");

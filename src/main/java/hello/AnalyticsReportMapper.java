@@ -22,7 +22,8 @@ public class AnalyticsReportMapper {
 		for (ReportData reportData : reportDataList) {
 			count = count + getTotalCount(reportData.getCounts());
 		}
-		return String.valueOf(count);
+		long rounded = Math.round(count);
+		return String.valueOf(rounded);
 	}
 	
 	
