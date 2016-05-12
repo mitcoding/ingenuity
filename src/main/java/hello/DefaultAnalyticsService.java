@@ -9,8 +9,17 @@ import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Service;
 
+import com.adobe.analytics.client.AnalyticsClient;
+import com.adobe.analytics.client.AnalyticsClientBuilder;
+import com.adobe.analytics.client.domain.CompanyReportSuite;
+import com.adobe.analytics.client.domain.CompanyReportSuites;
+import com.adobe.analytics.client.methods.ReportSuiteMethods;
+
 @Service
 public class DefaultAnalyticsService implements AnalyticsService {
+	
+    private static String USERNAME = "";
+    private static String PASSWORD = "";
 	
 	@Override
 	public String queryDate(String date, String[] pageNames) throws IOException, InterruptedException {
@@ -50,5 +59,31 @@ public class DefaultAnalyticsService implements AnalyticsService {
 //	public String getJsonFromDate(String date, String[] pageNames) throws IOException, InterruptedException {
 //		String response = queryDate(date, pageNames);
 //	}
+	
+	@Override
+	public String getAnalytics() {
 
+		AnalyticsClient client = new AnalyticsClientBuilder()
+		.setEndpoint("api2.omniture.com")
+		.authenticateWithSecret(USERNAME, PASSWORD)
+		.withProxy("", 0)
+		.build();
+
+		StringBuilder builder = new StringBuilder();
+
+		ReportSuiteMethods suiteMethods = new ReportSuiteMethods(client); //client is created as above
+		CompanyReportSuites reportSuites;
+		try {
+			reportSuites = suiteMethods.getReportSuites();
+			for (CompanyReportSuite suite : reportSuites.getReportSuites()) {
+				System.out.println(suite.toString());
+				builder.append(suite.toString());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return builder.toString();
+	}
 }

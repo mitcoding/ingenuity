@@ -67,7 +67,7 @@ public class SiteCatalystTest {
 	      Map<String, Object> reportMap = new HashMap<String, Object>();
 	      
 	      reportMap.put("date", date);
-	      reportMap.put("reportSuiteID", "");
+	      reportMap.put("reportSuiteID", "capgroupint");
 	      Map<String, Object> metricMap = new HashMap<String, Object>();
 	      metricMap.put("id", "pageViews");
 	      ArrayList<Map<String,Object>> metricArray = new ArrayList<Map<String,Object>>();

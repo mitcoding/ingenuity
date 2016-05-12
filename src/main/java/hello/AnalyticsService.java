@@ -8,5 +8,7 @@ import org.springframework.stereotype.Service;
 public interface AnalyticsService {
 
 	public String queryDate(String date, String[] pageNames) throws IOException, InterruptedException;
+	
+	public String getAnalytics();
 
 }
