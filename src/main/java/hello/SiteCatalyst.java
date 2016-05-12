@@ -1,4 +1,4 @@
-package com.ingenuity;
+package hello;
 
 	/*
 	 * Simple example makes call to Omniture API to get a companies report suites
@@ -39,12 +39,10 @@ import org.apache.commons.codec.binary.Base64;
 	    private static String PASSWORD = "";
 	    private static String ENDPOINT = "https://api.omniture.com/admin/1.4/rest/"; 
 	    
-	    private SiteCatalyst() {}
-
 
 	    public static String callMethod(String method, String data) throws IOException {
-	        //System.setProperty("https.proxyHost", "");
-	        //System.setProperty("https.proxyPort", "");
+	        System.setProperty("https.proxyHost", "");
+	        System.setProperty("https.proxyPort", "");
 
 	        URL url = new URL(ENDPOINT + "?method=" + method);
 	        URLConnection connection = url.openConnection();
